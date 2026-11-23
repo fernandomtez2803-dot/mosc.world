@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <title>Conectar TikTok · MOSC Fabrica</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../estilo.css">
+</head>
+<body>
+<main>
+  <img class="logo" src="../logo.svg" alt="MOSC">
+  <p class="etiqueta">MOSC Fabrica · TikTok</p>
+  <div id="sin">
+    <h1>Página de vuelta de TikTok</h1>
+    <p>Aquí vuelve TikTok después de autorizar MOSC Fabrica. Ábrela desde <strong>CONECTAR_TIKTOK.cmd</strong>, no directamente.</p>
+  </div>
+  <div id="ok" hidden>
+    <h1 class="ok">TikTok ha autorizado MOSC Fabrica</h1>
+    <p>Copia este código y pégalo en la ventana negra de <strong>CONECTAR_TIKTOK</strong>. Caduca en unos minutos.</p>
+    <div class="codigo" id="codigo"></div>
+    <button id="copiar" type="button">Copiar el código</button>
+    <p id="copiado" class="ok" hidden>Copiado. Ya puedes pegarlo en la ventana negra.</p>
+  </div>
+  <div id="mal" hidden>
+    <h1 class="error">TikTok no ha dado permiso</h1>
+    <p id="motivo"></p>
+    <p>Vuelve a lanzar <strong>CONECTAR_TIKTOK.cmd</strong> y acepta los permisos.</p>
+  </div>
+</main>
+<script>
+  // TikTok vuelve con ?code=…&state=… (o con ?error=…). El código no sirve sin la clave secreta, que solo está en el
+  // ordenador de MOSC; esta página no lo envía a ningún sitio: solo lo enseña para copiarlo.
+  var q = new URLSearchParams(location.search);
+  var code = q.get('code'), error = q.get('error');
+  if (code) {
+    document.getElementById('sin').hidden = true;
+    document.getElementById('ok').hidden = false;
+    document.getElementById('codigo').textContent = code;
+    document.getElementById('copiar').onclick = function () {
+      var ok = function () { document.getElementById('copiado').hidden = false; };
+      if (navigator.clipboard) navigator.clipboard.writeText(code).then(ok, function () { seleccionar(); });
+      else seleccionar();
+    };
+    history.replaceState(null, '', location.pathname);   // que el código no se quede en el historial
+  } else if (error) {
+    document.getElementById('sin').hidden = true;
+    document.getElementById('mal').hidden = false;
+    document.getElementById('motivo').textContent = (q.get('error_description') || error);
+  }
+  function seleccionar() {
+    var r = document.createRange(); r.selectNodeContents(document.getElementById('codigo'));
+    var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+</script>
+</body>
+</html>
